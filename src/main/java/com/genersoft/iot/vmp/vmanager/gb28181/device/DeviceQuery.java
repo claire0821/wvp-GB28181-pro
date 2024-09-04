@@ -5,6 +5,7 @@ import com.genersoft.iot.vmp.conf.DynamicTask;
 import com.genersoft.iot.vmp.conf.exception.ControllerException;
 import com.genersoft.iot.vmp.conf.security.JwtUtils;
 import com.genersoft.iot.vmp.gb28181.bean.Device;
+import com.genersoft.iot.vmp.gb28181.bean.DeviceAlarm;
 import com.genersoft.iot.vmp.gb28181.bean.DeviceChannel;
 import com.genersoft.iot.vmp.gb28181.bean.SyncStatus;
 import com.genersoft.iot.vmp.gb28181.task.ISubscribeTask;
@@ -586,4 +587,5 @@ public class DeviceQuery {
 
 		return new ResponseEntity<>(pageInfo,HttpStatus.OK);
 	}
+
 }

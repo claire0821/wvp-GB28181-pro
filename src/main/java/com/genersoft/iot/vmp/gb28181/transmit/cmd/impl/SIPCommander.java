@@ -1452,4 +1452,46 @@ public class SIPCommander implements ISIPCommander {
 
 
     }
+
+    /**
+     * 私有协议-http转发
+     *
+     * @param device 设备
+     * @param httpText http报文
+     */
+    public boolean httpForwarding(Device device,String httpText,String contents,SipSubscribe.Event errorEvent) {
+        try {
+            StringBuffer cmdXml = new StringBuffer(200);
+            cmdXml.append("<?xml version=\"1.0\" encoding=\"GB2312\"?>\r\n");
+            cmdXml.append("<Notify>\r\n");
+            cmdXml.append("<CmdType>ZC_MSG</CmdType>\r\n");
+            cmdXml.append("<SN>" + (int)((Math.random()*9+1)*100000) + "</SN>\r\n");
+            cmdXml.append("<DeviceID>" + device.getDeviceId() + "</DeviceID>\r\n");
+            cmdXml.append("<Status>" + "OK" + "</Status>\r\n");
+            String http = httpText +
+                    "\r\nAccept: */*,application/json\r\n"+
+                    "Accept-Charset: UTF8\r\n"+
+                    "Accept-Language: zh-cn;q=0.8,en;q=0.6,ja;q=0.4\r\n"+
+                    "Content-Type: application/json\r\n"+
+                    "Authorization: Basic YWRtaW46YWRtaW4=\r\n"+
+                    "User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 2.0.50727)\r\n"+
+                    "Host: "+ device.getIp() + ":9000\r\n" +
+                    "Content-Length: "+ contents.length() + "\r\n" +
+                    "Cache-Control: no-cache\r\n"+
+                    "\r\n" +contents;
+            cmdXml.append("<Http>" + http +	"</Http>\r\n");
+            cmdXml.append("</Notify>\r\n");
+            logger.debug("私有协议-客户端http参数转发报文\r\n" + http);
+            logger.debug("私有协议-客户端http完整XML\r\n" + cmdXml);
+            String tm = Long.toString(System.currentTimeMillis());
+
+            CallIdHeader newCallIdHeader = sipSender.getNewCallIdHeader(sipLayer.getLocalIp(device.getLocalIp()), device.getTransport());
+            Request request = headerProvider.createMessageRequest(device, cmdXml.toString(), null, "FromZCDeviceInfo" + tm, null, newCallIdHeader);
+            sipSender.transmitRequest(sipLayer.getLocalIp(device.getLocalIp()), request, errorEvent);
+            return true;
+        } catch (SipException | ParseException | InvalidArgumentException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

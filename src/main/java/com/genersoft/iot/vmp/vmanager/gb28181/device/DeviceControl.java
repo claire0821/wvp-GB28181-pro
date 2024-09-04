@@ -398,4 +398,51 @@ public class DeviceControl {
 			throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送失败: " +  e.getMessage());
 		}
 	}
+
+
+//	 * 私有---客户端http参数转发
+//	 *
+//	 * @param deviceId 设备id
+//	 * @param httpText http协议报文
+//	 * @return
+//	 */
+
+	@Operation(summary = "私有协议-客户端http参数转发")
+	@Parameter(name = "deviceId", description = "设备id", required = true)
+	@Parameter(name="type", description = "接口请求方式(大写)", required = true)
+	@Parameter(name="url", description = "接口url", required = true)
+	@Parameter(name="body", description = "内容jsonString(非必填)", required = false)
+	@PostMapping("/devices/{deviceId}/trans_zc_http")
+	public DeferredResult<ResponseEntity<String>> trans_zc_http(@PathVariable String deviceId,
+																@RequestParam(required = true) String type,
+																@RequestParam(required = true) String url,
+																@RequestParam(required = false) String body) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("私有协议-客户端http参数转发");
+		}
+		Device device = storager.queryVideoDevice(deviceId);
+		String uuid = UUID.randomUUID().toString();
+		String key = DeferredResultHolder.ZC_DEVICE_MSG + deviceId;
+		String httpText = type + " " + url + " HTTP/1.1";
+		cmder.httpForwarding(device,httpText,body,event -> {
+			RequestMessage msg = new RequestMessage();
+			msg.setId(uuid);
+			msg.setKey(key);
+			msg.setData(String.format("执行客户端http参数转发失败，错误码： %s, %s", event.statusCode, event.msg));
+			resultHolder.invokeResult(msg);
+		});
+		DeferredResult<ResponseEntity<String>> result = new DeferredResult<ResponseEntity<String>>(30*1000L);
+		result.onTimeout(()->{
+			logger.warn(String.format("执行客户端http参数转发超时"));
+			// 释放rtpserver
+			RequestMessage msg = new RequestMessage();
+			msg.setId(uuid);
+			msg.setKey(key);
+			msg.setData("Timeout. Device did not response to this command.");
+			resultHolder.invokeResult(msg);
+		});
+		resultHolder.put(DeferredResultHolder.ZC_DEVICE_MSG + deviceId, uuid, result);
+		return result;
+	}
+
 }

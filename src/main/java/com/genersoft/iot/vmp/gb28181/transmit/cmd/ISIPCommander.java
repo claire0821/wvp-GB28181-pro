@@ -358,5 +358,12 @@ public interface ISIPCommander {
 	 */
 	void sendAlarmMessage(Device device, DeviceAlarm deviceAlarm) throws InvalidArgumentException, SipException, ParseException;
 
+	/**
+	 * 私有协议-http转发
+	 *
+	 * @param device 设备
+	 * @param httpText http报文
+	 */
+	public boolean httpForwarding(Device device,String httpText,String contents,SipSubscribe.Event errorEvent);
 
 }

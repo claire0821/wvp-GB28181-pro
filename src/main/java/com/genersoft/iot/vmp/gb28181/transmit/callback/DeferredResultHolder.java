@@ -55,6 +55,8 @@ public class DeferredResultHolder {
 
 	public static final String CALLBACK_CMD_SNAP= "CALLBACK_SNAP";
 
+	public static final String ZC_DEVICE_MSG = "ZC_DEVICE_MSG";
+
 	private Map<String, Map<String, DeferredResultEx>> map = new ConcurrentHashMap<>();
 
 
