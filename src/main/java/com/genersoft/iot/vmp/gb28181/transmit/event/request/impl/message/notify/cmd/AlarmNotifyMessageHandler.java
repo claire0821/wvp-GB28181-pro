@@ -184,7 +184,7 @@ public class AlarmNotifyMessageHandler extends SIPRequestProcessorParent impleme
                             }
                             alarmChannelMessage.setGbId(channelId);
                             redisCatchStorage.sendAlarmMsg(alarmChannelMessage);
-                            continue;
+//                            continue;
                         }
 
                         logger.debug("存储报警信息、报警分类");

@@ -2,10 +2,7 @@ package com.genersoft.iot.vmp.vmanager.gb28181.sse;
 
 import com.genersoft.iot.vmp.gb28181.event.alarm.AlarmEventListener;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
@@ -21,6 +18,7 @@ import java.io.PrintWriter;
  * @since 2021/01/20
  */
 @Tag(name = "SSE 推送")
+@CrossOrigin(origins = "http://10.21.3.200:18081")
 @RestController
 @RequestMapping("/api")
 public class SseController {

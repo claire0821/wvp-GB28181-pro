@@ -29,7 +29,6 @@ import java.util.Arrays;
 import java.util.List;
 
 @Tag(name = "报警信息管理")
-
 @RestController
 @RequestMapping("/api/alarm")
 public class AlarmController {
@@ -187,5 +186,19 @@ public class AlarmController {
 
         return deviceAlarmService.getAllAlarm(page, count, deviceId, alarmPriority, alarmMethod,
                 alarmType, startTime, endTime);
+    }
+
+    /**
+     *  查询最近指定数量报警
+     *
+     * @param count 每页查询数量
+     * @return
+     */
+    @Operation(summary = "查询最近指定数量报警", security = @SecurityRequirement(name = JwtUtils.HEADER))
+    @Parameter(name = "count",description = "查询最近指定数量报警",required = true)
+    @GetMapping("/getLatest")
+    public List<DeviceAlarm> getLatest(
+            @RequestParam(required = true, defaultValue = "10")  int count) {
+        return deviceAlarmService.queryLatest(count);
     }
 }

@@ -40,4 +40,9 @@ public interface IDeviceAlarmService {
      */
     int clearAlarmBeforeTime(Integer id, List<String> deviceIdList, String time);
 
+    /**
+     * 查询最新告警
+     * @param count 查询数量
+     */
+    public List<DeviceAlarm> queryLatest(int count);
 }

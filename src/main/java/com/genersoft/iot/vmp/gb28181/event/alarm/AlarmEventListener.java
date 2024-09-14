@@ -1,5 +1,7 @@
 package com.genersoft.iot.vmp.gb28181.event.alarm;
 
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,9 +58,9 @@ public class AlarmEventListener implements ApplicationListener<AlarmEvent> {
                     it.remove();
                     continue;
                 }
-
+                JSONObject jsonObject = (JSONObject) JSON.toJSON(event.getAlarmInfo());
                 String sseMsg = "event:message\n" +
-                        "data:" + msg + "\n" +
+                        "data:" + jsonObject.toString() + "\n" +
                         "\n";
                 writer.write(sseMsg);
                 writer.flush();

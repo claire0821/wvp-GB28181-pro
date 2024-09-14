@@ -36,6 +36,14 @@ public interface DeviceAlarmMapper {
     List<DeviceAlarm> query(@Param("deviceId") String deviceId, @Param("alarmPriority") String alarmPriority, @Param("alarmMethod") String alarmMethod,
                             @Param("alarmType") String alarmType, @Param("startTime") String startTime, @Param("endTime") String endTime);
 
+    @Select( value = {" <script>" +
+            " SELECT * FROM wvp_device_alarm " +
+            " WHERE 1=1 " +
+            " ORDER BY alarm_time DESC " +  // 按时间倒序排列，获取最新的记录
+            " LIMIT #{limit} " +  // 限制返回结果的条数为10条
+            " </script>"} )
+    List<DeviceAlarm> queryLatest(@Param("limit") Integer limit);
+
 
     @Delete(" <script>" +
             "DELETE FROM wvp_device_alarm WHERE 1=1 " +
@@ -47,4 +55,6 @@ public interface DeviceAlarmMapper {
             " </script>"
             )
     int clearAlarmBeforeTime(@Param("id") Integer id, @Param("deviceIdList") List<String> deviceIdList, @Param("time") String time);
+
+
 }
