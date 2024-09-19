@@ -79,27 +79,27 @@ sip:
   # 是否存储alarm信息
   alarm: true
 
-#zlm 默认服务器配置
+#zlm 默认服务器配置10
 media:
-  id: zlmediakit-local
+  id: zlmediakit-local-36
   # [必须修改] zlm服务器的内网IP
-  ip: 10.21.0.65
+  ip: 10.21.0.36
   # [可选] 有公网IP就配置公网IP, 不可用域名
   wan_ip:
   # [必须修改] zlm服务器的http.port
-  http-port: 9092
+  http-port: 18088 #18088 #9092
   # [可选] zlm服务器访问WVP所使用的IP, 默认使用127.0.0.1，zlm和wvp没有部署在同一台服务器时必须配置
   hook-ip: 10.21.0.61
   # [必选选] zlm服务器的hook.admin_params=secret
-  secret: nQ4Xe8NEaPNHZKG6ghhDipOj4HVZ4kcW
+  secret: nCwLJWx6Tqzmcm3QfIaj1fjNyvHY5gL9 #nCwLJWx6Tqzmcm3QfIaj1fjNyvHY5gL9 #nQ4Xe8NEaPNHZKG6ghhDipOj4HVZ4kcW
   # 启用多端口模式, 多端口模式使用端口区分每路流，兼容性更好。 单端口使用流的ssrc区分， 点播超时建议使用多端口测试
   rtp:
     # [可选] 是否启用多端口模式, 开启后会在portRange范围内选择端口用于媒体流传输
     enable: true
     # [可选] 在此范围内选择端口用于媒体流传输, 必须提前在zlm上配置该属性，不然自动配置此属性可能不成功
-    port-range: 50000,50300 # 端口范围
+    port-range: 50000,50036 # 端口范围
     # [可选] 国标级联在此范围内选择端口发送媒体流,
-    send-port-range: 50000,50300 # 端口范围
+    send-port-range: 50000,50036 # 端口范围
 # [根据业务需求配置]
 user-settings:
   # 点播/录像回放 等待超时时间,单位：毫秒
