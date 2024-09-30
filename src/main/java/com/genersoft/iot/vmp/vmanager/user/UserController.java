@@ -25,6 +25,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.security.sasl.AuthenticationException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -52,6 +54,9 @@ public class UserController {
     public LoginUser login(HttpServletRequest request, HttpServletResponse response, @RequestParam String username, @RequestParam String password){
         LoginUser user;
         try {
+            if(password.length() < 32) {
+                password = getMD5(password);
+            }
             user = SecurityUtils.login(username, password, authenticationManager);
         } catch (AuthenticationException e) {
             throw new ControllerException(ErrorCode.ERROR100.getCode(), e.getMessage());
@@ -65,7 +70,62 @@ public class UserController {
         }
         return user;
     }
+    @GetMapping("/auth")
+    @PostMapping("/auth")
+    @Operation(summary = "登录", description = "登录成功后返回AccessToken， 可以从返回值获取到也可以从响应头中获取到，" +
+            "后续的请求需要添加请求头 'access-token'或者放在参数里")
 
+    @Parameter(name = "username", description = "用户名", required = true)
+    @Parameter(name = "password", description = "密码（32位md5加密）", required = true)
+    public LoginUser auth(HttpServletRequest request, HttpServletResponse response, @RequestParam String username, @RequestParam String password){
+        LoginUser user;
+        try {
+            System.out.println("登录密码" + password);
+            if(password.length() < 32) {
+                password = getMD5(password);
+            }
+            System.out.println("登录密码" + password);
+            user = SecurityUtils.login(username, password, authenticationManager);
+        } catch (AuthenticationException e) {
+            throw new ControllerException(ErrorCode.ERROR100.getCode(), e.getMessage());
+        }
+        if (user == null) {
+            throw new ControllerException(ErrorCode.ERROR100.getCode(), "用户名或密码错误");
+        }else {
+            String jwt = JwtUtils.createToken(username);
+            response.setHeader(JwtUtils.getHeader(), jwt);
+            user.setAccessToken(jwt);
+        }
+        return user;
+    }
+    /**
+     * 将字符串转换为MD5哈希值的十六进制表示
+     *
+     * @param input 输入的字符串
+     * @return MD5哈希值的十六进制表示
+     */
+    public static String getMD5(String input) {
+        try {
+            // 创建一个MessageDigest实例，并初始化为MD5算法对象
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            // 使用指定的字节数组更新摘要
+            md.update(input.getBytes());
+            // 完成哈希计算，得到结果
+            byte[] digest = md.digest();
+            // 将得到的字节数组转换成十六进制字符串
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : digest) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @PostMapping("/changePassword")
     @Operation(summary = "修改密码", security = @SecurityRequirement(name = JwtUtils.HEADER))
