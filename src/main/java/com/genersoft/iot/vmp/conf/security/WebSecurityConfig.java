@@ -18,6 +18,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.CorsUtils;
@@ -111,13 +112,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and().csrf().disable()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-
                 // 配置拦截规则
                 .and()
                 .authorizeRequests()
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                 .antMatchers(userSetting.getInterfaceAuthenticationExcludes().toArray(new String[0])).permitAll()
-                .antMatchers("/api/user/login", "/index/hook/**","/index/hook/abl/**", "/swagger-ui/**", "/doc.html#/**").permitAll()
+                .antMatchers("/api/user/login", "/api/user/auth",
+                        "/index/hook/**","/index/hook/abl/**", "/swagger-ui/**", "/doc.html#/**",
+                        "/api/device/control/devices/{deviceId}/trans_zc_http").permitAll()
                 .anyRequest().authenticated()
                 // 异常处理器
                 .and()

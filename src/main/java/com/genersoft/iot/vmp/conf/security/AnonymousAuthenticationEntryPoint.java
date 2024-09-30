@@ -20,7 +20,7 @@ import java.nio.charset.StandardCharsets;
  * @author lin
  */
 @Component
-public class    AnonymousAuthenticationEntryPoint implements AuthenticationEntryPoint {
+public class  AnonymousAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException e) {
