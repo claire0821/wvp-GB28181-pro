@@ -165,9 +165,13 @@ public class AlarmNotifyMessageHandler extends SIPRequestProcessorParent impleme
                             }
                         }
                         if (!ObjectUtils.isEmpty(deviceAlarm.getDeviceId())) {
-                            if (deviceAlarm.getAlarmMethod().contains(DeviceAlarmMethod.Video.getVal() + "")) {
-                                deviceAlarm.setAlarmType(getText(sipMsgInfo.getRootElement().element("Info"), "AlarmType"));
+//                            if (deviceAlarm.getAlarmMethod().contains(DeviceAlarmMethod.Video.getVal() + "")) {
+                            String alarmType = getText(sipMsgInfo.getRootElement().element("Info"), "AlarmType");
+                            if(alarmType != null) {
+                                //6 闯入告警 自定义扩展 1005 火情告警  1006 超温告警
+                                deviceAlarm.setAlarmType(alarmType);
                             }
+//                            }
                         }
                         logger.info("[收到报警通知]内容：{}", JSON.toJSONString(deviceAlarm));
                         // 作者自用判断，其他小伙伴需要此消息可以自行修改，但是不要提在pr里
