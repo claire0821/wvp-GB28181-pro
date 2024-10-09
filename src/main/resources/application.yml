@@ -37,14 +37,14 @@ spring:
       datasource:
         master:
           type: com.zaxxer.hikari.HikariDataSource
-#          driver-class-name: com.mysql.cj.jdbc.Driver
-#          url: jdbc:mysql://10.21.0.65:3306/wvp2?useUnicode=true&characterEncoding=UTF8&rewriteBatchedStatements=true&serverTimezone=PRC&useSSL=false&allowMultiQueries=true
-#          username: pr
-#          password: Pr16171618#
-          driver-class-name: org.postgresql.Driver
-          url: jdbc:postgresql://10.21.0.36:5432/wvp2?stringtype=unspecified
-          username: tom1
-          password: Pr16171618
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://10.21.0.65:3306/wvp2?useUnicode=true&characterEncoding=UTF8&rewriteBatchedStatements=true&serverTimezone=PRC&useSSL=false&allowMultiQueries=true
+          username: pr
+          password: Pr16171618#
+#          driver-class-name: org.postgresql.Driver
+#          url: jdbc:postgresql://10.21.0.36:5432/wvp2?stringtype=unspecified
+#          username: tom1
+#          password: Pr16171618
           hikari:
             connection-timeout: 20000             # 是客户端等待连接池连接的最大毫秒数
             initialSize: 50                       # 连接池初始化连接数
@@ -77,7 +77,7 @@ sip:
   # [可选]
   domain: 3402000000
   # [可选]
-  id: 34020000002000000610
+  id: 34020000002000000615
   # [可选] 默认设备认证密码，后续扩展使用设备单独密码, 移除密码将不进行校验
   password: #bajiuwulian1006
   # 是否存储alarm信息
@@ -85,17 +85,17 @@ sip:
 
 #zlm 默认服务器配置10
 media:
-  id: zlmediakit-local-36
+  id: zlmediakit-local-65
   # [必须修改] zlm服务器的内网IP
-  ip: 10.21.0.36
+  ip: 10.21.0.65
   # [可选] 有公网IP就配置公网IP, 不可用域名
   wan_ip:
   # [必须修改] zlm服务器的http.port
-  http-port: 18088 #18088 #9092
+  http-port: 9092 #18088 #9092
   # [可选] zlm服务器访问WVP所使用的IP, 默认使用127.0.0.1，zlm和wvp没有部署在同一台服务器时必须配置
   hook-ip: 10.21.0.61
   # [必选选] zlm服务器的hook.admin_params=secret
-  secret: nCwLJWx6Tqzmcm3QfIaj1fjNyvHY5gL9 #nCwLJWx6Tqzmcm3QfIaj1fjNyvHY5gL9 #nQ4Xe8NEaPNHZKG6ghhDipOj4HVZ4kcW
+  secret: nQ4Xe8NEaPNHZKG6ghhDipOj4HVZ4kcW #nCwLJWx6Tqzmcm3QfIaj1fjNyvHY5gL9 #nQ4Xe8NEaPNHZKG6ghhDipOj4HVZ4kcW
   # 启用多端口模式, 多端口模式使用端口区分每路流，兼容性更好。 单端口使用流的ssrc区分， 点播超时建议使用多端口测试
   rtp:
     # [可选] 是否启用多端口模式, 开启后会在portRange范围内选择端口用于媒体流传输
