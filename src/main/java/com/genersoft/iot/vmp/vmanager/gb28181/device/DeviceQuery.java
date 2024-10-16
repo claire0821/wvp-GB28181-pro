@@ -20,6 +20,7 @@ import com.genersoft.iot.vmp.service.IInviteStreamService;
 import com.genersoft.iot.vmp.storager.IRedisCatchStorage;
 import com.genersoft.iot.vmp.storager.IVideoManagerStorage;
 import com.genersoft.iot.vmp.vmanager.bean.BaseTree;
+import com.genersoft.iot.vmp.vmanager.bean.DeviceChannelTree;
 import com.genersoft.iot.vmp.vmanager.bean.ErrorCode;
 import com.genersoft.iot.vmp.vmanager.bean.WVPResult;
 import com.github.pagehelper.PageInfo;
@@ -31,6 +32,7 @@ import org.apache.commons.compress.utils.IOUtils;
 import org.apache.ibatis.annotations.Options;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -113,6 +115,25 @@ public class DeviceQuery {
 		return storager.queryVideoDeviceList(page, count,null);
 	}
 
+	/**
+	 * 查询国标设备树
+	 * @return 分页国标列表
+	 */
+	@Operation(summary = "查询国标设备树", security = @SecurityRequirement(name = JwtUtils.HEADER))
+	@GetMapping("/device/query/tree")
+	@Options()
+	public List<DeviceChannelTree> devices(){
+		List<Device> all = deviceService.getAll();
+		List<DeviceChannelTree> list = new ArrayList<>();
+		for (Device device : all) {
+			List<DeviceChannel> deviceChannels = deviceChannelService.queryChaneListByDeviceId(device.getDeviceId());
+			DeviceChannelTree deviceChannelTree = new DeviceChannelTree();
+			BeanUtils.copyProperties(device,deviceChannelTree);
+			deviceChannelTree.setDeviceChannelList(deviceChannels);
+			list.add(deviceChannelTree);
+		}
+		return list;
+	}
 	/**
 	 * 分页查询通道数
 	 *
