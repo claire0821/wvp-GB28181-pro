@@ -208,9 +208,10 @@ public class ZLMHttpHookListener {
     @ResponseBody
     @PostMapping(value = "/on_stream_changed", produces = "application/json;charset=UTF-8")
     public HookResult onStreamChanged(@RequestBody OnStreamChangedHookParam param) {
-
+        logger.info("[ZLM HOOK] 流变化, {}->{}->{}/{}", param.getMediaServerId(), param.getSchema(), param.getApp(), param.getStream());
         MediaServer mediaServer = mediaServerService.getOne(param.getMediaServerId());
         if (mediaServer == null) {
+            logger.info("获取流媒体失败{}", param.getMediaServerId());
             return HookResult.SUCCESS();
         }
         if (!ObjectUtils.isEmpty(mediaServer.getTranscodeSuffix())

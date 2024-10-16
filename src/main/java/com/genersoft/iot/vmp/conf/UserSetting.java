@@ -43,7 +43,10 @@ public class UserSetting {
 
     private Boolean pushAuthority = Boolean.TRUE;
 
-    private Boolean syncChannelOnDeviceOnline = Boolean.FALSE;
+    /**
+     * 设备上线,离线状态下重新注册
+     */
+    private Boolean syncChannelOnDeviceOnline = Boolean.TRUE;
 
     private Boolean sipLog = Boolean.FALSE;
     private Boolean sqlLog = Boolean.FALSE;

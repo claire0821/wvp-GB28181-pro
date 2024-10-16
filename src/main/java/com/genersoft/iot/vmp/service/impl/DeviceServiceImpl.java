@@ -171,11 +171,17 @@ public class DeviceServiceImpl implements IDeviceService {
                 }
 
             }else {
-                if (deviceChannelMapper.queryAllChannels(device.getDeviceId()).size() == 0) {
+                List<DeviceChannel> deviceChannels = deviceChannelMapper.queryAllChannels(device.getDeviceId());
+                if (deviceChannels.size() == 0) {
                     logger.info("[设备上线]: {}，通道数为0,查询通道信息", device.getDeviceId());
                     sync(device);
                 }
-
+                else {
+                    //更新通道在线状态
+                    for (DeviceChannel deviceChannel : deviceChannels) {
+                        deviceChannelMapper.online(deviceChannel.getDeviceId(),deviceChannel.getChannelId());
+                    }
+                }
                 deviceMapper.update(device);
                 redisCatchStorage.updateDevice(device);
             }

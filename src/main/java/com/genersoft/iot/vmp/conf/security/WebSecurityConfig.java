@@ -82,6 +82,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             matchers.add("/record_proxy/*/**");
             matchers.add("/api/emit");
             matchers.add("/favicon.ico");
+            matchers.add("/file/**");
             // 可以直接访问的静态数据
             web.ignoring().antMatchers(matchers.toArray(new String[0]));
         }
@@ -118,7 +119,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                 .antMatchers(userSetting.getInterfaceAuthenticationExcludes().toArray(new String[0])).permitAll()
                 .antMatchers("/api/user/login", "/api/user/auth",
-                        "/index/hook/**","/index/hook/abl/**", "/swagger-ui/**", "/doc.html#/**",
+                        "/index/hook/**","/index/hook/abl/**", "/swagger-ui/**", "/doc.html#/**","/api/system/imgUpload",
                         "/api/device/control/devices/{deviceId}/trans_zc_http").permitAll()
                 .anyRequest().authenticated()
                 // 异常处理器
