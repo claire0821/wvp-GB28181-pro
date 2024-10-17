@@ -1,5 +1,6 @@
 package com.genersoft.iot.vmp.storager.dao;
 
+import com.genersoft.iot.vmp.gb28181.bean.AlarmCountInfo;
 import com.genersoft.iot.vmp.gb28181.bean.DeviceAlarm;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
@@ -56,5 +57,103 @@ public interface DeviceAlarmMapper {
             )
     int clearAlarmBeforeTime(@Param("id") Integer id, @Param("deviceIdList") List<String> deviceIdList, @Param("time") String time);
 
+    @Select( value = {" <script>" +
+            " SELECT DATE_FORMAT(alarm_time, '%Y-%m') AS time, " +
+            " COUNT(*) AS count " +
+            " FROM wvp_device_alarm " +
+            " WHERE 1=1 " +
+            " GROUP BY time  " +
+            " ORDER BY time  " +
+            " </script>"} )
+    List<AlarmCountInfo> countAlarmsByMonth();
 
+    @Select( value = {" <script>" +
+            " SELECT " +
+            " TO_CHAR(date_trunc('month', CAST ( alarm_time AS TIMESTAMP )), 'YYYY-MM') AS time,  " +
+            " COUNT(*) AS count " +
+            " FROM wvp_device_alarm " +
+            " WHERE 1=1 " +
+            " GROUP BY time  " +
+            " ORDER BY time  " +
+            " </script>"} )
+    List<AlarmCountInfo> countAlarmsByMonthPgsql();
+
+    @Select( value = {" <script>" +
+            " SELECT DATE_FORMAT(alarm_time, '%Y-%m') AS time, " +
+            " alarm_type AS type, " +
+            " COUNT(*) AS count " +
+            " FROM wvp_device_alarm " +
+            " WHERE 1=1 " +
+            " GROUP BY time, type  " +
+            " ORDER BY time, type  " +
+            " </script>"} )
+    List<AlarmCountInfo> countAlarmsByMonthType();
+
+    @Select( value = {" <script>" +
+            " SELECT " +
+            " TO_CHAR(date_trunc('month', CAST ( alarm_time AS TIMESTAMP )), 'YYYY-MM') AS time,  " +
+            " alarm_type AS type, " +
+            " COUNT(*) AS count " +
+            " FROM wvp_device_alarm " +
+            " WHERE 1=1 " +
+            " GROUP BY time , type  " +
+            " ORDER BY time , type " +
+            " </script>"} )
+    List<AlarmCountInfo> countAlarmsByMonthTypePgsql();
+
+    @Select( value = {" <script>" +
+            " SELECT alarm_type AS type, " +
+            " COUNT(*) AS count " +
+            " FROM wvp_device_alarm " +
+            " WHERE 1=1 " +
+            " GROUP BY type  " +
+            " ORDER BY type  " +
+            " </script>"} )
+    List<AlarmCountInfo> countAlarmsByType();
+
+    @Select( value = {" <script>" +
+            " SELECT DATE_FORMAT(alarm_time, '%Y-%m') AS time, " +
+            " alarm_type AS type, " +
+            " COUNT(*) AS count " +
+            " FROM wvp_device_alarm " +
+            " WHERE alarm_time >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH) " +
+            " GROUP BY time, type  " +
+            " ORDER BY time, type  " +
+            " </script>"} )
+    List<AlarmCountInfo> countAlarmsBy6MonthType();
+
+    @Select( value = {" <script>" +
+            " SELECT " +
+            " TO_CHAR( date_trunc( 'month', CAST ( alarm_time AS TIMESTAMP ) ), 'YYYY-MM' ) AS time, " +
+            " alarm_type AS type, " +
+            " COUNT(*) AS count " +
+            " FROM wvp_device_alarm " +
+            " WHERE alarm_time >= #{startTime} " +
+            " GROUP BY time, type  " +
+            " ORDER BY time, type  " +
+            " </script>"} )
+    List<AlarmCountInfo> countAlarmsBy6MonthTypePgsql(@Param("startTime") String startTime);
+
+    @Select( value = {" <script>" +
+            " SELECT DATE(alarm_time) AS time, " +
+            " alarm_type AS type, " +
+            " COUNT(*) AS count " +
+            " FROM wvp_device_alarm " +
+            " WHERE alarm_time >= #{startTime} " +
+            " GROUP BY time, type  " +
+            " ORDER BY time, type  " +
+            " </script>"} )
+    List<AlarmCountInfo> countAlarmsByDay(@Param("startTime") String startTime);
+
+    @Select( value = {" <script>" +
+            " SELECT " +
+            " TO_CHAR( date_trunc( 'day', CAST ( alarm_time AS TIMESTAMP ) ), 'YYYY-MM-dd' ) AS TIME, " +
+            " alarm_type AS type, " +
+            " COUNT(*) AS count " +
+            " FROM wvp_device_alarm " +
+            " WHERE alarm_time >= #{startTime} " +
+            " GROUP BY time, type  " +
+            " ORDER BY time, type  " +
+            " </script>"} )
+    List<AlarmCountInfo> countAlarmsByDayPgsql(@Param("startTime") String startTime);
 }

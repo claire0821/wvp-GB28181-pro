@@ -2,6 +2,7 @@ package com.genersoft.iot.vmp.vmanager.gb28181.alarm;
 
 import com.genersoft.iot.vmp.conf.exception.ControllerException;
 import com.genersoft.iot.vmp.conf.security.JwtUtils;
+import com.genersoft.iot.vmp.gb28181.bean.AlarmCountInfo;
 import com.genersoft.iot.vmp.gb28181.bean.Device;
 import com.genersoft.iot.vmp.gb28181.bean.DeviceAlarm;
 import com.genersoft.iot.vmp.gb28181.bean.ParentPlatform;
@@ -10,23 +11,30 @@ import com.genersoft.iot.vmp.gb28181.transmit.cmd.ISIPCommanderForPlatform;
 import com.genersoft.iot.vmp.service.IDeviceAlarmService;
 import com.genersoft.iot.vmp.storager.IVideoManagerStorage;
 import com.genersoft.iot.vmp.utils.DateUtil;
+import com.genersoft.iot.vmp.vmanager.bean.AlarmType;
 import com.genersoft.iot.vmp.vmanager.bean.ErrorCode;
 import com.github.pagehelper.PageInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.apache.poi.util.LittleEndian;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.sip.InvalidArgumentException;
 import javax.sip.SipException;
 import java.text.ParseException;
-import java.util.Arrays;
-import java.util.List;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @Tag(name = "报警信息管理")
 @RestController
@@ -200,5 +208,176 @@ public class AlarmController {
     public List<DeviceAlarm> getLatest(
             @RequestParam(required = true, defaultValue = "10")  int count) {
         return deviceAlarmService.queryLatest(count);
+    }
+
+    /**
+     *  查询全部报警数量，每月统计一次
+     *
+     * @return
+     */
+    @Operation(summary = "查询全部报警数量，每月统计一次", security = @SecurityRequirement(name = JwtUtils.HEADER))
+    @GetMapping("/countAlarmsByMonth")
+    public List<AlarmCountInfo> countAlarmsByMonth() {
+        List<AlarmCountInfo> alarmCountInfos = deviceAlarmService.countAlarmsByMonth();
+        if(alarmCountInfos.size() <= 1) {
+            return alarmCountInfos;
+        }
+        //列出全部日期
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM");
+        LocalDate startTime = YearMonth.parse(alarmCountInfos.get(0).getTime(), DateTimeFormatter.ofPattern("yyyy-MM")).atDay(1);
+        LocalDate endTime = YearMonth.parse(alarmCountInfos.get(alarmCountInfos.size() - 1).getTime(), DateTimeFormatter.ofPattern("yyyy-MM")).atDay(1);
+        List<String> monthList = new ArrayList<>();
+        monthList.add(startTime.format(formatter));
+        while (startTime.isBefore(endTime)) {
+            startTime = startTime.plusMonths(1);
+            monthList.add(startTime.format(formatter));
+        }
+        List<AlarmCountInfo> list = new ArrayList<>();
+        for (String s : monthList) {
+            list.add(getAlarmCount(alarmCountInfos,null,s));
+        }
+        return list;
+    }
+
+    @Operation(summary = "查询全部报警数量，每月统计一次,区分报警类型", security = @SecurityRequirement(name = JwtUtils.HEADER))
+    @GetMapping("/countAlarmsByMonthType")
+    public List<AlarmCountInfo> countAlarmsByMonthType() {
+        List<AlarmCountInfo> alarmCountInfos = deviceAlarmService.countAlarmsByMonthType();
+        if(alarmCountInfos.size() <= 0) {
+            throw new ControllerException(ErrorCode.ERROR404);
+        }
+        //列出全部日期
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM");
+        LocalDate startTime = YearMonth.parse(alarmCountInfos.get(0).getTime(), DateTimeFormatter.ofPattern("yyyy-MM")).atDay(1);
+        LocalDate endTime = YearMonth.parse(alarmCountInfos.get(alarmCountInfos.size() - 1).getTime(), DateTimeFormatter.ofPattern("yyyy-MM")).atDay(1);
+        List<String> monthList = new ArrayList<>();
+        monthList.add(startTime.format(formatter));
+        while (startTime.isBefore(endTime)) {
+            startTime = startTime.plusMonths(1);
+            monthList.add(startTime.format(formatter));
+        }
+        List<AlarmCountInfo> list = new ArrayList<>();
+        for (String s : monthList) {
+            list.add(getAlarmCount(alarmCountInfos,AlarmType.FIRE.getCode(),s));
+            list.add(getAlarmCount(alarmCountInfos,AlarmType.BREAKIN.getCode(),s));
+            list.add(getAlarmCount(alarmCountInfos,AlarmType.OVERTEMPERATUREOVERTEMPERATURE.getCode(),s));
+        }
+        return list;
+    }
+    @Operation(summary = "查询全部报警数量，区分报警类型", security = @SecurityRequirement(name = JwtUtils.HEADER))
+    @GetMapping("/countAlarmsByType")
+    public List<AlarmCountInfo> countAlarmsByType() {
+        List<AlarmCountInfo> alarmCountInfos = deviceAlarmService.countAlarmsByType();
+        List<AlarmCountInfo> list = new ArrayList<>();
+        list.add(getAlarmCount(alarmCountInfos,AlarmType.FIRE.getCode(),""));
+        list.add(getAlarmCount(alarmCountInfos,AlarmType.BREAKIN.getCode(),""));
+        list.add(getAlarmCount(alarmCountInfos,AlarmType.OVERTEMPERATUREOVERTEMPERATURE.getCode(),""));
+        list.add(getAlarmCount(alarmCountInfos,AlarmType.OTHER.getCode(),""));
+        return list;
+    }
+    @Operation(summary = "查询最近半年报警数量，按月分组，区分报警类型", security = @SecurityRequirement(name = JwtUtils.HEADER))
+    @GetMapping("/countAlarmsBy6MonthType")
+    public List<AlarmCountInfo> countAlarmsBy6MonthType() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM");
+        // 获取当前日期
+        LocalDate currentDate = LocalDate.now();
+        List<String> monthList = new ArrayList<>();
+        monthList.add((currentDate.format(formatter)));
+        for(int i = 0; i < 5; i++) {
+            currentDate = currentDate.minusMonths(1);
+            monthList.add((currentDate.format(formatter)));
+        }
+        Collections.reverse(monthList);
+
+
+        List<AlarmCountInfo> alarmCountInfos = deviceAlarmService.countAlarmsBy6MonthType(currentDate.format(formatter));
+        List<AlarmCountInfo> list = new ArrayList<>();
+        for (String s : monthList) {
+            list.add(getAlarmCount(alarmCountInfos,AlarmType.FIRE.getCode(),s));
+            list.add(getAlarmCount(alarmCountInfos,AlarmType.BREAKIN.getCode(),s));
+            list.add(getAlarmCount(alarmCountInfos,AlarmType.OVERTEMPERATUREOVERTEMPERATURE.getCode(),s));
+        }
+        return list;
+    }
+
+    @Operation(summary = "查询最近一个星期报警数量，按天分组，区分报警类型", security = @SecurityRequirement(name = JwtUtils.HEADER))
+    @GetMapping("/countAlarmsByDay")
+    public List<AlarmCountInfo> countAlarmsByDay() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        // 获取当前日期
+        LocalDate currentDate = LocalDate.now();
+        List<String> monthList = new ArrayList<>();
+        monthList.add((currentDate.format(formatter)));
+        for(int i = 0; i < 6; i++) {
+            currentDate = currentDate.minusDays(1);
+            monthList.add((currentDate.format(formatter)));
+        }
+        Collections.reverse(monthList);
+
+        List<AlarmCountInfo> alarmCountInfos = deviceAlarmService.countAlarmsByDay(currentDate.format(formatter));
+        List<AlarmCountInfo> list = new ArrayList<>();
+        for (String s : monthList) {
+            list.add(getAlarmCount(alarmCountInfos,AlarmType.FIRE.getCode(),s));
+            list.add(getAlarmCount(alarmCountInfos,AlarmType.BREAKIN.getCode(),s));
+            list.add(getAlarmCount(alarmCountInfos,AlarmType.OVERTEMPERATUREOVERTEMPERATURE.getCode(),s));
+        }
+        //将时间转换成周几输出
+        for (AlarmCountInfo alarmCountInfo : list) {
+            LocalDate date = LocalDate.parse(alarmCountInfo.getTime(), formatter);
+            // 获取该日期的星期几
+            DayOfWeek dayOfWeek = date.getDayOfWeek();
+            String weekDay = convertToWeekDay(dayOfWeek);
+            alarmCountInfo.setTime(weekDay);
+        }
+        return list;
+    }
+    private AlarmCountInfo getAlarmCount(List<AlarmCountInfo> alarmCountInfos,Integer type, String time) {
+        AlarmCountInfo alarmCountInfo = new AlarmCountInfo();
+        alarmCountInfo.setTime(time);
+        alarmCountInfo.setCount(0);
+        alarmCountInfo.setType(type);
+        if(CollectionUtils.isEmpty(alarmCountInfos)) {
+            return alarmCountInfo;
+        }
+        if(type != null && time.length() > 0) {
+            Optional<AlarmCountInfo> first = alarmCountInfos.stream().filter(item -> Objects.equals(item.getType(), type) && time.equals((item.getTime()))).findFirst();
+            if(first.isPresent()) {
+                alarmCountInfo.setCount(first.get().getCount());
+            }
+        }
+        else if(type == null && time.length() > 0) {
+            Optional<AlarmCountInfo> first = alarmCountInfos.stream().filter(item -> time.equals((item.getTime()))).findFirst();
+            if(first.isPresent()) {
+                alarmCountInfo.setCount(first.get().getCount());
+            }
+        }
+        else if(type != null && time.length() <= 0) {
+            Optional<AlarmCountInfo> first = alarmCountInfos.stream().filter(item -> Objects.equals(item.getType(), type)).findFirst();
+            if(first.isPresent()) {
+                alarmCountInfo.setCount(first.get().getCount());
+            }
+        }
+        return alarmCountInfo;
+    }
+    // 自定义的转换方法
+    private static String convertToWeekDay(DayOfWeek dayOfWeek) {
+        switch (dayOfWeek) {
+            case MONDAY:
+                return "周一";
+            case TUESDAY:
+                return "周二";
+            case WEDNESDAY:
+                return "周三";
+            case THURSDAY:
+                return "周四";
+            case FRIDAY:
+                return "周五";
+            case SATURDAY:
+                return "周六";
+            case SUNDAY:
+                return "周日";
+            default:
+                throw new IllegalArgumentException("未知的星期几: " + dayOfWeek);
+        }
     }
 }

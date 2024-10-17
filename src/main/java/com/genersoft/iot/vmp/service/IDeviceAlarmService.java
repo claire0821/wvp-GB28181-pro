@@ -1,5 +1,6 @@
 package com.genersoft.iot.vmp.service;
 
+import com.genersoft.iot.vmp.gb28181.bean.AlarmCountInfo;
 import com.genersoft.iot.vmp.gb28181.bean.DeviceAlarm;
 import com.github.pagehelper.PageInfo;
 
@@ -45,4 +46,14 @@ public interface IDeviceAlarmService {
      * @param count 查询数量
      */
     public List<DeviceAlarm> queryLatest(int count);
+
+    public List<AlarmCountInfo> countAlarmsByMonth();
+
+    public List<AlarmCountInfo> countAlarmsByMonthType();
+
+    public List<AlarmCountInfo> countAlarmsByType();
+
+    public List<AlarmCountInfo> countAlarmsBy6MonthType(String startTime);
+
+    public List<AlarmCountInfo> countAlarmsByDay(String startTime);
 }
