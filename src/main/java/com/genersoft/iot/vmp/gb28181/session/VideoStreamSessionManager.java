@@ -151,6 +151,8 @@ public class VideoStreamSessionManager {
 		for (SsrcTransaction ssrcTransaction : ssrcTransactionList) {
 			redisTemplate.delete(VideoManagerConstants.MEDIA_TRANSACTION_USED_PREFIX + userSetting.getServerId() + ":"
 					+  deviceId + ":" + channelId + ":" + ssrcTransaction.getCallId() + ":" + ssrcTransaction.getStream());
+			//删除前把信息保存起来
+			saveOldTransaction(ssrcTransaction,deviceId,channelId);
 		}
 	}
 
@@ -161,8 +163,20 @@ public class VideoStreamSessionManager {
 		}
 		redisTemplate.delete(VideoManagerConstants.MEDIA_TRANSACTION_USED_PREFIX + userSetting.getServerId() + ":"
 				+  deviceId + ":" + channelId + ":" + ssrcTransaction.getCallId() + ":" + ssrcTransaction.getStream());
+		//删除前把信息保存起来
+		saveOldTransaction(ssrcTransaction,deviceId,channelId);
+	}
+	//保留旧的国标点播信息
+	public void saveOldTransaction(SsrcTransaction ssrcTransaction,String deviceId, String channelId) {
+		redisTemplate.opsForValue().set(VideoManagerConstants.MEDIA_TRANSACTION_USED_OLD_PREFIX + userSetting.getServerId()
+				+ ":" +  deviceId + ":" + channelId + ":" + deviceId + "_" + channelId, ssrcTransaction);
 	}
 
+	public Object getOldTransaction(String deviceId, String channelId) {
+		String key = VideoManagerConstants.MEDIA_TRANSACTION_USED_OLD_PREFIX + userSetting.getServerId()
+				+ ":" +  deviceId + ":" + channelId + ":" + deviceId + "_" + channelId;
+		return redisTemplate.opsForValue().get(key);
+	}
 
 	public List<SsrcTransaction> getAllSsrc() {
 		List<Object> ssrcTransactionKeys = RedisUtil.scan(redisTemplate, String.format("%s_*_*_*_*", VideoManagerConstants.MEDIA_TRANSACTION_USED_PREFIX+ userSetting.getServerId()));

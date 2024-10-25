@@ -1627,4 +1627,19 @@ public class PlayServiceImpl implements IPlayService {
             mediaServerService.closeRTPServer(inviteInfo.getStreamInfo().getMediaServerId(), inviteInfo.getStream());
         }
     }
+
+    @Override
+    public void sendBye(Device device, String channelId) {
+        try {
+            logger.info("[停止点播] {}/{}", device.getDeviceId(), channelId);
+            cmder.streamByeCmd(device, channelId, (event) -> {
+                logger.error("[停止点播命令发送失败] " + event.msg);
+            }, (event) -> {
+                logger.info("[停止点播命令发送成功] ");
+            });
+        } catch (InvalidArgumentException | SipException | ParseException | SsrcTransactionNotFoundException e) {
+            logger.error("[命令发送失败] 停止点播， 发送BYE: {}", e.getMessage());
+            throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送失败: " + e.getMessage());
+        }
+    }
 }

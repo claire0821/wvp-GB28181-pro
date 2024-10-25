@@ -172,6 +172,28 @@ public class PlayController {
 		json.put("channelId", channelId);
 		return json;
 	}
+
+	@Operation(summary = "发送点播bye命令", security = @SecurityRequirement(name = JwtUtils.HEADER))
+	@Parameter(name = "deviceId", description = "设备国标编号", required = true)
+	@Parameter(name = "channelId", description = "通道国标编号", required = true)
+	@GetMapping("/sendBye/{deviceId}/{channelId}")
+	public JSONObject sendBye(@PathVariable String deviceId, @PathVariable String channelId) {
+		logger.info(String.format("发送点播bye命令API调用，streamId：%s_%s", deviceId, channelId ));
+		if (deviceId == null || channelId == null) {
+			throw new ControllerException(ErrorCode.ERROR400);
+		}
+
+		Device device = storager.queryVideoDevice(deviceId);
+		if (device == null) {
+			throw new ControllerException(ErrorCode.ERROR100.getCode(), "设备[" + deviceId + "]不存在");
+		}
+
+		playService.sendBye(device, channelId);
+		JSONObject json = new JSONObject();
+		json.put("deviceId", deviceId);
+		json.put("channelId", channelId);
+		return json;
+	}
 	/**
 	 * 结束转码
 	 */

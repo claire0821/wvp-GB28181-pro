@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import javax.sip.InvalidArgumentException;
@@ -38,6 +39,7 @@ import javax.sip.SipFactory;
 import javax.sip.header.CallIdHeader;
 import javax.sip.message.Request;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -681,7 +683,25 @@ public class SIPCommander implements ISIPCommander {
             streamSession.removeByCallId(ssrcTransaction.getDeviceId(), ssrcTransaction.getChannelId(), ssrcTransaction.getCallId());
             Request byteRequest = headerProvider.createByteRequest(device, channelId, ssrcTransaction.getSipTransactionInfo());
             sipSender.transmitRequest(sipLayer.getLocalIp(device.getLocalIp()), byteRequest, null, okEvent);
+            System.out.println(byteRequest.toString());
         }
+    }
+
+    @Override
+    public void streamByeCmd(Device device, String channelId,SipSubscribe.Event errorEvent,SipSubscribe.Event okEvent) throws InvalidArgumentException, SipException, ParseException, SsrcTransactionNotFoundException {
+        if (device == null) {
+            logger.warn("[发送BYE] device为null");
+            return;
+        }
+        SsrcTransaction oldTransaction = (SsrcTransaction)streamSession.getOldTransaction(device.getDeviceId(), channelId);
+        if(oldTransaction == null) {
+            throw new SsrcTransactionNotFoundException(device.getDeviceId(), channelId, "", device.getDeviceId() + "_" + channelId);
+        }
+
+        Request byteRequest = headerProvider.createByteRequest(device, channelId, oldTransaction.getSipTransactionInfo());
+        sipSender.transmitRequest(sipLayer.getLocalIp(device.getLocalIp()), byteRequest, errorEvent, okEvent);
+        logger.info("发送bye命令===========");
+        System.out.println(byteRequest.toString());
     }
 
     @Override

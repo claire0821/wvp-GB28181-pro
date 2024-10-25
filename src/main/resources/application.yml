@@ -107,13 +107,13 @@ media:
 # [根据业务需求配置]
 user-settings:
   # 点播/录像回放 等待超时时间,单位：毫秒
-  play-timeout: 180000
+  play-timeout: 30000
   # [可选] 自动点播， 使用固定流地址进行播放时，如果未点播则自动进行点播, 需要rtp.enable=true
   auto-apply-play: true
   # 推流直播是否录制
-  record-push-live: true
+  record-push-live: false
   # 国标是否录制
-  record-sip: true
+  record-sip: false
   # 国标点播 按需拉流, true：有人观看拉流，无人观看释放， false：拉起后不自动释放
   stream-on-demand: true
 

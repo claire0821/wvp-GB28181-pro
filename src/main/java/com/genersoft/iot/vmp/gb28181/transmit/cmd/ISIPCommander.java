@@ -130,6 +130,10 @@ public interface ISIPCommander {
 	 * 视频流停止
 	 */
 	void streamByeCmd(Device device, String channelId, String stream, String callId, SipSubscribe.Event okEvent) throws InvalidArgumentException, SipException, ParseException, SsrcTransactionNotFoundException;
+	/**
+	 * 发送点播停止命令
+	 */
+	void streamByeCmd(Device device, String channelId,SipSubscribe.Event errorEvent,SipSubscribe.Event okEvent) throws InvalidArgumentException, SipException, ParseException, SsrcTransactionNotFoundException;
 
 	void talkStreamCmd(MediaServer mediaServerItem, SendRtpItem sendRtpItem, Device device, String channelId, String callId, HookSubscribe.Event event, HookSubscribe.Event eventForPush, SipSubscribe.Event okEvent, SipSubscribe.Event errorEvent) throws InvalidArgumentException, SipException, ParseException;
 

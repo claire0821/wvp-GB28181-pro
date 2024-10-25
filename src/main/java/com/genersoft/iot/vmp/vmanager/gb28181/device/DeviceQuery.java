@@ -120,7 +120,7 @@ public class DeviceQuery {
 	 * @return 分页国标列表
 	 */
 	@Operation(summary = "查询国标设备树", security = @SecurityRequirement(name = JwtUtils.HEADER))
-	@GetMapping("/device/query/tree")
+	@GetMapping("/tree")
 	@Options()
 	public List<DeviceChannelTree> devices(){
 		List<Device> all = deviceService.getAll();

@@ -52,6 +52,7 @@ public class VideoManagerConstants {
 	public static final String MEDIA_SSRC_USED_PREFIX = "VMP_MEDIA_USED_SSRC_";
 
 	public static final String MEDIA_TRANSACTION_USED_PREFIX = "VMP_MEDIA_TRANSACTION_";
+	public static final String MEDIA_TRANSACTION_USED_OLD_PREFIX = "VMP_MEDIA_TRANSACTION_OLD_";
 
 	public static final String MEDIA_STREAM_AUTHORITY = "VMP_MEDIA_STREAM_AUTHORITY_";
 

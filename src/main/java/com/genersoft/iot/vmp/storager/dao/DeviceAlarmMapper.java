@@ -1,6 +1,7 @@
 package com.genersoft.iot.vmp.storager.dao;
 
 import com.genersoft.iot.vmp.gb28181.bean.AlarmCountInfo;
+import com.genersoft.iot.vmp.gb28181.bean.AlarmDevInfo;
 import com.genersoft.iot.vmp.gb28181.bean.DeviceAlarm;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
@@ -156,4 +157,38 @@ public interface DeviceAlarmMapper {
             " ORDER BY time, type  " +
             " </script>"} )
     List<AlarmCountInfo> countAlarmsByDayPgsql(@Param("startTime") String startTime);
+
+    @Select( value = {" <script>" +
+            " SELECT device_id AS devId, " +
+            " COUNT(*) AS total " +
+            " FROM wvp_device_alarm " +
+            " WHERE 1=1 " +
+            " GROUP BY devId  " +
+            " ORDER BY devId  " +
+            " </script>"} )
+    List<AlarmDevInfo> countTotalAlarmsByDev();
+
+    @Select( value = {" <script>" +
+            " SELECT device_id AS devId, " +
+            " COUNT(*) AS today " +
+            " FROM wvp_device_alarm " +
+            " WHERE DATE(alarm_time) = CURDATE() " +
+            " GROUP BY devId  " +
+            " ORDER BY devId  " +
+            " </script>"} )
+    List<AlarmDevInfo> countTodayAlarmsByDev();
+
+
+    @Select( value = {" <script>" +
+            " SELECT " +
+            " TO_CHAR( date_trunc( 'day', CAST ( alarm_time AS TIMESTAMP ) ), 'YYYY-MM-dd' ) AS TIME, " +
+            " device_id AS devId, " +
+            " COUNT(*) AS today " +
+            " FROM wvp_device_alarm " +
+            " WHERE alarm_time >= #{startTime} " +
+            " GROUP BY devId  " +
+            " ORDER BY devId  " +
+            " </script>"} )
+    List<AlarmDevInfo> countAlarmsByDayDevPgsql(@Param("startTime") String startTime);
+
 }

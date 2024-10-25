@@ -2,13 +2,11 @@ package com.genersoft.iot.vmp.vmanager.gb28181.alarm;
 
 import com.genersoft.iot.vmp.conf.exception.ControllerException;
 import com.genersoft.iot.vmp.conf.security.JwtUtils;
-import com.genersoft.iot.vmp.gb28181.bean.AlarmCountInfo;
-import com.genersoft.iot.vmp.gb28181.bean.Device;
-import com.genersoft.iot.vmp.gb28181.bean.DeviceAlarm;
-import com.genersoft.iot.vmp.gb28181.bean.ParentPlatform;
+import com.genersoft.iot.vmp.gb28181.bean.*;
 import com.genersoft.iot.vmp.gb28181.transmit.cmd.ISIPCommander;
 import com.genersoft.iot.vmp.gb28181.transmit.cmd.ISIPCommanderForPlatform;
 import com.genersoft.iot.vmp.service.IDeviceAlarmService;
+import com.genersoft.iot.vmp.storager.IRedisCatchStorage;
 import com.genersoft.iot.vmp.storager.IVideoManagerStorage;
 import com.genersoft.iot.vmp.utils.DateUtil;
 import com.genersoft.iot.vmp.vmanager.bean.AlarmType;
@@ -40,6 +38,9 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/alarm")
 public class AlarmController {
+
+    @Autowired
+    private IRedisCatchStorage redisCatchStorage;
 
     private final static Logger logger = LoggerFactory.getLogger(AlarmController.class);
 
@@ -331,6 +332,27 @@ public class AlarmController {
         }
         return list;
     }
+    @Operation(summary = "查询全部设备总告警数，当天告警数，设备状态", security = @SecurityRequirement(name = JwtUtils.HEADER))
+    @GetMapping("/countAlarmsByDev")
+    public List<AlarmDevInfo> countAlarmsByDev() {
+        List<AlarmDevInfo> alarmDevInfoTotal = deviceAlarmService.countTotalAlarmsByDev();
+        List<AlarmDevInfo> alarmDevInfosToday = deviceAlarmService.countTodayAlarmsByDev();
+        if(CollectionUtils.isEmpty(alarmDevInfoTotal)){
+            throw new ControllerException(ErrorCode.ERROR404);
+        }
+        for (AlarmDevInfo alarmDevInfo : alarmDevInfoTotal) {
+            Optional<AlarmDevInfo> first = alarmDevInfosToday.stream().filter(item -> item.getDevId().equals(alarmDevInfo.getDevId())).findFirst();
+            alarmDevInfo.setToday(0);
+            alarmDevInfo.setStatus("Offline");
+            if(first.isPresent()) {
+                alarmDevInfo.setToday(first.get().getToday());
+            }
+            if(redisCatchStorage.deviceIsOnline(alarmDevInfo.getDevId())) {
+                alarmDevInfo.setStatus("Online");
+            }
+        }
+        return alarmDevInfoTotal;
+    }
     private AlarmCountInfo getAlarmCount(List<AlarmCountInfo> alarmCountInfos,Integer type, String time) {
         AlarmCountInfo alarmCountInfo = new AlarmCountInfo();
         alarmCountInfo.setTime(time);
@@ -355,6 +377,13 @@ public class AlarmController {
             Optional<AlarmCountInfo> first = alarmCountInfos.stream().filter(item -> Objects.equals(item.getType(), type)).findFirst();
             if(first.isPresent()) {
                 alarmCountInfo.setCount(first.get().getCount());
+            } else {
+                if(type == AlarmType.OTHER.getCode()) {
+                    first = alarmCountInfos.stream().filter(item -> item.getType() == null).findFirst();
+                    if (first.isPresent()) {
+                        alarmCountInfo.setCount(first.get().getCount());
+                    }
+                }
             }
         }
         return alarmCountInfo;

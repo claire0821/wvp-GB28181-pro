@@ -603,6 +603,9 @@ public class RedisCatchStorageImpl implements IRedisCatchStorage {
 
     @Override
     public boolean deviceIsOnline(String deviceId) {
+        if(getDevice(deviceId) == null) {
+            return false;
+        }
         return getDevice(deviceId).isOnLine();
     }
 
