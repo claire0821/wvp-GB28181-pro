@@ -161,7 +161,7 @@ public class AlarmController {
     @Parameter(name = "startTime",description = "开始时间")
     @Parameter(name = "endTime",description = "结束时间")
     @GetMapping("/all")
-    public PageInfo<DeviceAlarm> getAll(
+    public PageInfo<DeviceAlarmInfo> getAll(
             @RequestParam int page,
             @RequestParam int count,
             @RequestParam(required = false)  String deviceId,
@@ -192,7 +192,6 @@ public class AlarmController {
         }else if (!DateUtil.verification(endTime, DateUtil.formatter) ){
             throw new ControllerException(ErrorCode.ERROR400.getCode(), "endTime格式为" + DateUtil.PATTERN);
         }
-
         return deviceAlarmService.getAllAlarm(page, count, deviceId, alarmPriority, alarmMethod,
                 alarmType, startTime, endTime);
     }
@@ -408,5 +407,11 @@ public class AlarmController {
             default:
                 throw new IllegalArgumentException("未知的星期几: " + dayOfWeek);
         }
+    }
+
+    @Operation(summary = "查询全部报警设备号", security = @SecurityRequirement(name = JwtUtils.HEADER))
+    @GetMapping("/queryAlarmDeviceList")
+    public List<String> queryAlarmDeviceList() {
+        return deviceAlarmService.queryAlarmDeviceList();
     }
 }

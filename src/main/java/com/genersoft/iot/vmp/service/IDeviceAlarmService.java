@@ -3,6 +3,7 @@ package com.genersoft.iot.vmp.service;
 import com.genersoft.iot.vmp.gb28181.bean.AlarmCountInfo;
 import com.genersoft.iot.vmp.gb28181.bean.AlarmDevInfo;
 import com.genersoft.iot.vmp.gb28181.bean.DeviceAlarm;
+import com.genersoft.iot.vmp.gb28181.bean.DeviceAlarmInfo;
 import com.github.pagehelper.PageInfo;
 
 import java.util.List;
@@ -25,8 +26,8 @@ public interface IDeviceAlarmService {
      * @param endTime 结束时间
      * @return 报警列表
      */
-    PageInfo<DeviceAlarm> getAllAlarm(int page, int count, String deviceId, String alarmPriority, String alarmMethod,
-                                      String alarmType, String startTime, String endTime);
+    PageInfo<DeviceAlarmInfo> getAllAlarm(int page, int count, String deviceId, String alarmPriority, String alarmMethod,
+                                          String alarmType, String startTime, String endTime);
 
     /**
      * 添加一个报警
@@ -60,4 +61,6 @@ public interface IDeviceAlarmService {
 
     public List<AlarmDevInfo> countTotalAlarmsByDev();
     public List<AlarmDevInfo> countTodayAlarmsByDev();
+
+    public List<String> queryAlarmDeviceList();
 }

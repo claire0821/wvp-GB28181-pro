@@ -1,9 +1,6 @@
 package com.genersoft.iot.vmp.vmanager.bean;
 
 
-import com.genersoft.iot.vmp.gb28181.bean.DeviceChannel;
-import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.util.List;
 
 public class DeviceChannelTree {
@@ -27,10 +24,11 @@ public class DeviceChannelTree {
      * 在线
      */
     private boolean onLine;
+
     /**
      * 通道
      */
-    private List<DeviceChannel> deviceChannelList;
+    private List<DeviceChannelTreeItem> children;
 
     public String getDeviceId() {
         return deviceId;
@@ -72,11 +70,11 @@ public class DeviceChannelTree {
         this.onLine = onLine;
     }
 
-    public List<DeviceChannel> getDeviceChannelList() {
-        return deviceChannelList;
+    public List<DeviceChannelTreeItem> getChildren() {
+        return children;
     }
 
-    public void setDeviceChannelList(List<DeviceChannel> deviceChannelList) {
-        this.deviceChannelList = deviceChannelList;
+    public void setChildren(List<DeviceChannelTreeItem> children) {
+        this.children = children;
     }
 }

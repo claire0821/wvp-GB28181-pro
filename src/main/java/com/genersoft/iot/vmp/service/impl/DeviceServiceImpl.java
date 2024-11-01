@@ -341,6 +341,7 @@ public class DeviceServiceImpl implements IDeviceService {
             logger.info("开启同步时发现同步已经存在");
             return;
         }
+        logger.info("[同步通道]: 开始同步通道{}" , device.getDeviceId());
         int sn = (int)((Math.random()*9+1)*100000);
         catalogResponseMessageHandler.setChannelSyncReady(device, sn);
         try {

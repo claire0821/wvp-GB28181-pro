@@ -5,11 +5,14 @@ import com.genersoft.iot.vmp.gb28181.SipLayer;
 import com.genersoft.iot.vmp.gb28181.bean.Device;
 import com.genersoft.iot.vmp.gb28181.bean.SipTransactionInfo;
 import com.genersoft.iot.vmp.gb28181.session.VideoStreamSessionManager;
+import com.genersoft.iot.vmp.gb28181.transmit.cmd.impl.SIPCommander;
 import com.genersoft.iot.vmp.gb28181.utils.SipUtils;
 import com.genersoft.iot.vmp.storager.IRedisCatchStorage;
 import com.genersoft.iot.vmp.utils.GitUtil;
 import gov.nist.javax.sip.message.SIPRequest;
 import gov.nist.javax.sip.message.SIPResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,7 +34,7 @@ import java.util.ArrayList;
  */
 @Component
 public class SIPRequestHeaderProvider {
-
+	private final Logger logger = LoggerFactory.getLogger(SIPRequestHeaderProvider.class);
 	@Autowired
 	private SipConfig sipConfig;
 	
@@ -77,6 +80,10 @@ public class SIPRequestHeaderProvider {
 
 		ContentTypeHeader contentTypeHeader = SipFactory.getInstance().createHeaderFactory().createContentTypeHeader("Application", "MANSCDP+xml");
 		request.setContent(content, contentTypeHeader);
+
+		logger.info("发送请求开始");
+		logger.info("\n\r" + request);
+		logger.info("发送请求结束");
 		return request;
 	}
 	

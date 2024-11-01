@@ -77,8 +77,8 @@ public class VideoManagerConstants {
 	public static final String START_SEND_PUSH_STREAM = "VMP_START_SEND_PUSH_STREAM:";
 	public static final String PUSH_STREAM_ONLINE = "VMP_PUSH_STREAM_ONLINE:";
 
-
-
+	//视频轮播
+	public static final String VIDEO_CAROUSEL_PREFIX = "VMP_VIDEO_CAROUSEL:";
 
 	//************************** redis 消息*********************************
 

@@ -5,7 +5,6 @@ import com.genersoft.iot.vmp.conf.DynamicTask;
 import com.genersoft.iot.vmp.conf.exception.ControllerException;
 import com.genersoft.iot.vmp.conf.security.JwtUtils;
 import com.genersoft.iot.vmp.gb28181.bean.Device;
-import com.genersoft.iot.vmp.gb28181.bean.DeviceAlarm;
 import com.genersoft.iot.vmp.gb28181.bean.DeviceChannel;
 import com.genersoft.iot.vmp.gb28181.bean.SyncStatus;
 import com.genersoft.iot.vmp.gb28181.task.ISubscribeTask;
@@ -19,10 +18,7 @@ import com.genersoft.iot.vmp.service.IDeviceService;
 import com.genersoft.iot.vmp.service.IInviteStreamService;
 import com.genersoft.iot.vmp.storager.IRedisCatchStorage;
 import com.genersoft.iot.vmp.storager.IVideoManagerStorage;
-import com.genersoft.iot.vmp.vmanager.bean.BaseTree;
-import com.genersoft.iot.vmp.vmanager.bean.DeviceChannelTree;
-import com.genersoft.iot.vmp.vmanager.bean.ErrorCode;
-import com.genersoft.iot.vmp.vmanager.bean.WVPResult;
+import com.genersoft.iot.vmp.vmanager.bean.*;
 import com.github.pagehelper.PageInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -37,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
@@ -127,9 +124,25 @@ public class DeviceQuery {
 		List<DeviceChannelTree> list = new ArrayList<>();
 		for (Device device : all) {
 			List<DeviceChannel> deviceChannels = deviceChannelService.queryChaneListByDeviceId(device.getDeviceId());
+			List<DeviceChannelTreeItem> deviceChannelTreeItems = new ArrayList<>();
+			if(!CollectionUtils.isEmpty(deviceChannels)) {
+				for (DeviceChannel deviceChannel : deviceChannels) {
+					DeviceChannelTreeItem deviceChannelTreeItem = new DeviceChannelTreeItem();
+					BeanUtils.copyProperties(deviceChannel,deviceChannelTreeItem);
+					deviceChannelTreeItem.setVideoCarousel(false);
+					deviceChannelTreeItem.setVideoCarouselDuration(0);
+					//查询视频轮播
+					Integer videoCarousel = redisCatchStorage.getVideoCarousel(deviceChannelTreeItem.getDeviceId(), deviceChannelTreeItem.getChannelId());
+					if(videoCarousel != null && videoCarousel > 0) {
+						deviceChannelTreeItem.setVideoCarousel(true);
+						deviceChannelTreeItem.setVideoCarouselDuration(videoCarousel);
+					}
+					deviceChannelTreeItems.add(deviceChannelTreeItem);
+				}
+			}
 			DeviceChannelTree deviceChannelTree = new DeviceChannelTree();
 			BeanUtils.copyProperties(device,deviceChannelTree);
-			deviceChannelTree.setDeviceChannelList(deviceChannels);
+			deviceChannelTree.setChildren(deviceChannelTreeItems);
 			list.add(deviceChannelTree);
 		}
 		return list;
@@ -609,4 +622,27 @@ public class DeviceQuery {
 		return new ResponseEntity<>(pageInfo,HttpStatus.OK);
 	}
 
+	/**
+	 * 更新轮播设置
+	 * @return
+	 */
+	@Operation(summary = "更新轮播设置", security = @SecurityRequirement(name = JwtUtils.HEADER))
+	@PostMapping("/videoCarousel/update")
+	@ResponseBody
+	public void updateChannel(@RequestBody List<DeviceChannelTree> deviceChannelTree){
+		if(CollectionUtils.isEmpty(deviceChannelTree)) {
+			return;
+		}
+		redisCatchStorage.cleanVideoCarousel();
+		for (DeviceChannelTree channelTree : deviceChannelTree) {
+			List<DeviceChannelTreeItem> children = channelTree.getChildren();
+			if(!CollectionUtils.isEmpty(children)) {
+				for (DeviceChannelTreeItem child : children) {
+					if(child.isVideoCarousel() && child.getVideoCarouselDuration() > 0) {
+						redisCatchStorage.setVideoCarousel(child.getDeviceId(),child.getChannelId(),child.getVideoCarouselDuration());
+					}
+				}
+			}
+		}
+	}
 }

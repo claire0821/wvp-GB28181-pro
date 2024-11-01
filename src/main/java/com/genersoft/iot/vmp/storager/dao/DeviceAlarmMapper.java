@@ -191,4 +191,13 @@ public interface DeviceAlarmMapper {
             " </script>"} )
     List<AlarmDevInfo> countAlarmsByDayDevPgsql(@Param("startTime") String startTime);
 
+    @Select( value = {" <script>" +
+            " SELECT " +
+            " device_id " +
+            " FROM wvp_device_alarm " +
+            " GROUP BY device_id  " +
+            " ORDER BY device_id  " +
+            " </script>"} )
+    List<String> queryAlarmDeviceList();
+
 }

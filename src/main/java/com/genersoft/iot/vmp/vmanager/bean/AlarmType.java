@@ -6,14 +6,14 @@ public enum AlarmType {
     OVERTEMPERATUREOVERTEMPERATURE(1006, "超温告警"),
     OTHER(0, "其他告警");
 
-    private final int code;
+    private final Integer code;
     private final String msg;
     AlarmType(int code, String msg) {
         this.code = code;
         this.msg = msg;
     }
 
-    public int getCode() {
+    public Integer getCode() {
         return code;
     }
 

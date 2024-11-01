@@ -229,4 +229,25 @@ public interface IRedisCatchStorage {
     void sendStartSendRtp(SendRtpItem sendRtpItem);
 
     void sendPushStreamOnline(SendRtpItem sendRtpItem);
+
+    /**
+     * 获取轮播时长
+     * @param deviceId
+     * @param channelId
+     * @return 轮播时长 null为没有设置轮播
+     */
+    Integer getVideoCarousel(String deviceId, String channelId);
+
+    /**
+     * 设置轮播时长
+     * @param deviceId
+     * @param channelId
+     * @param minute
+     */
+    void setVideoCarousel(String deviceId, String channelId, Integer minute);
+
+    /**
+     * 清空轮播配置
+     */
+    void cleanVideoCarousel();
 }

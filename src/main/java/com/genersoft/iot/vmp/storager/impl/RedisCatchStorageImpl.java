@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
 import java.util.*;
@@ -748,5 +749,29 @@ public class RedisCatchStorageImpl implements IRedisCatchStorage {
         String key = VideoManagerConstants.VM_MSG_STREAM_PUSH_CLOSE_REQUESTED;
         logger.info("[redis发送通知] 流上线 {}: {}/{}->{}", key, sendRtpItem.getApp(), sendRtpItem.getStream(), sendRtpItem.getPlatformId());
         redisTemplate.convertAndSend(key, JSON.toJSON(sendRtpItem));
+    }
+
+    @Override
+    public Integer getVideoCarousel(String deviceId, String channelId) {
+        String key = VideoManagerConstants.VIDEO_CAROUSEL_PREFIX + deviceId + ":" + channelId;
+        Integer value = (Integer)redisTemplate.opsForValue().get(key);
+        return value;
+    }
+
+    @Override
+    public void setVideoCarousel(String deviceId, String channelId,Integer minute) {
+        String key = VideoManagerConstants.VIDEO_CAROUSEL_PREFIX + deviceId + ":" + channelId;
+        if(minute == null  || minute <= 0) {
+            redisTemplate.delete(key);
+        } else {
+            redisTemplate.opsForValue().set(key,minute);
+        }
+    }
+
+    public void cleanVideoCarousel() {
+        Set<Object> keys = redisTemplate.keys(VideoManagerConstants.VIDEO_CAROUSEL_PREFIX + "*");
+        if (!CollectionUtils.isEmpty(keys)) {
+            redisTemplate.delete(keys);
+        }
     }
 }
