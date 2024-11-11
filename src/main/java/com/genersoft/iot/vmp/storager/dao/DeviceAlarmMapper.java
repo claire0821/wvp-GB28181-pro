@@ -39,6 +39,20 @@ public interface DeviceAlarmMapper {
                             @Param("alarmType") String alarmType, @Param("startTime") String startTime, @Param("endTime") String endTime);
 
     @Select( value = {" <script>" +
+            " SELECT Count(*) FROM wvp_device_alarm " +
+            " WHERE 1=1 " +
+            " <if test=\"deviceId != null\" >  AND device_id = #{deviceId}</if>" +
+            " <if test=\"alarmPriority != null\" >  AND alarm_priority = #{alarmPriority} </if>" +
+            " <if test=\"alarmMethod != null\" >  AND alarm_method = #{alarmMethod} </if>" +
+            " <if test=\"alarmType != null\" >  AND alarm_type = #{alarmType} </if>" +
+            " <if test=\"startTime != null\" >  AND alarm_time &gt;= #{startTime} </if>" +
+            " <if test=\"endTime != null\" >  AND alarm_time &lt;= #{endTime} </if>" +
+            " ORDER BY alarm_time ASC " +
+            " </script>"})
+    long queryCount(@Param("deviceId") String deviceId, @Param("alarmPriority") String alarmPriority, @Param("alarmMethod") String alarmMethod,
+                            @Param("alarmType") String alarmType, @Param("startTime") String startTime, @Param("endTime") String endTime);
+
+    @Select( value = {" <script>" +
             " SELECT * FROM wvp_device_alarm " +
             " WHERE 1=1 " +
             " ORDER BY alarm_time DESC " +  // 按时间倒序排列，获取最新的记录

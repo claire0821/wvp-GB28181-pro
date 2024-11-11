@@ -96,6 +96,20 @@ public class AlarmController {
         return deviceAlarmService.clearAlarmBeforeTime(id, deviceIdList, time);
     }
 
+    @PostMapping("/deleteByIds")
+    @Operation(summary = "根据id批量删除报警", security = @SecurityRequirement(name = JwtUtils.HEADER))
+    @Parameter(name = "ids", description = "报警id列表")
+    public int deleteByIds(@RequestBody Map<String, List<Integer>> ids) {
+        List<Integer> alarmIds = ids.get("ids"); // 获取传递的 ID 列表
+        if(CollectionUtils.isEmpty(alarmIds)){
+            throw new ControllerException(ErrorCode.ERROR100.getCode(),"至少选择一条删除");
+        }
+        int res = 0;
+        for (Integer id : alarmIds) {
+            res += deviceAlarmService.clearAlarmBeforeTime(id, null, null);
+        }
+        return res;
+    }
     /**
      *  测试向上级/设备发送模拟报警通知
      *
