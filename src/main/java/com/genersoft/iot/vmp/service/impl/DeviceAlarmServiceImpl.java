@@ -33,6 +33,8 @@ public class DeviceAlarmServiceImpl implements IDeviceAlarmService {
     private String url;
     @Override
     public PageInfo<DeviceAlarmInfo> getAllAlarm(int page, int count, String deviceId, String alarmPriority, String alarmMethod, String alarmType, String startTime, String endTime) {
+        // 获取总记录数
+        long total = deviceAlarmMapper.queryCount(deviceId, alarmPriority, alarmMethod, alarmType, startTime, endTime);
         PageHelper.startPage(page, count);
         List<DeviceAlarm> all = deviceAlarmMapper.query(deviceId, alarmPriority, alarmMethod, alarmType, startTime, endTime);
         List<DeviceAlarmInfo> deviceAlarmInfoList = new ArrayList<>();
@@ -54,7 +56,10 @@ public class DeviceAlarmServiceImpl implements IDeviceAlarmService {
             }
             deviceAlarmInfoList.add(deviceAlarmInfo);
         }
-        return new PageInfo<>(deviceAlarmInfoList);
+        // 使用PageInfo包装查询结果，获取分页信息
+        PageInfo<DeviceAlarmInfo> pageInfo = new PageInfo<>(deviceAlarmInfoList);
+        pageInfo.setTotal(total);
+        return pageInfo;
     }
 
     @Override
